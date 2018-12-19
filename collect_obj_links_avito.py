@@ -5,6 +5,8 @@ import requests
 import time
 import os
 
+import collect_proxies
+
 """ 
 Р�СЃС‚РѕСЂРёСЏ СЃС‚Р°С‚СЃСѓСЃР° (СЂР°Р·РјРµС‰РµРЅРѕ, Р·Р°РєСЂС‹С‚Рѕ, 
 РїРµСЂРµСЂР°Р·РјРµС‰РµРЅРѕ) """
@@ -14,6 +16,8 @@ path_data = os.path.join(os.getcwd(), "data")
 
 if not os.path.exists(path_pages): os.makedirs(path_pages)
 if not os.path.exists(path_data): os.makedirs(path_data)
+
+proxies = collect_proxies.Proxies()
 
 def get_categories(page):
     page = html.document_fromstring(page)
@@ -77,7 +81,7 @@ def get_count_pages(page):
 
 def get_objects2(link, cu, c, max_page=None):
     print('   ', link)
-    r = requests.get(link)
+    r = requests.get(link, proxies={'https':proxies+1})
     objects = get_objects(r.content)
     save_objects(objects, cu, c)
 
@@ -114,13 +118,12 @@ if __name__ == '__main__':
 
     domain_url = "https://avito.ru"
 
-    r = requests.get(domain_url+"/eysk/nedvizhimost/")
+    r = requests.get(domain_url+"/eysk/nedvizhimost/", proxies={'https':proxies+1})
     print(r.status_code)
     cat_links = get_categories(r.content)
 
     for i, cat_link in enumerate(cat_links):
         print(cat_link)
-        time.sleep(10)
 
         #cat_path = os.path.join(path_pages, "pages/"+cat_link.split('?')[0].replace('/', '_')+'.html')
         #with open(cat_path, 'wb') as f:
@@ -134,4 +137,3 @@ if __name__ == '__main__':
         for cur_page in range(1, max_page+1):
             max_page, count_objects = get_objects2(domain_url+cat_link+'&p='+str(cur_page), cu, c, max_page)
             print('    objects on page '+str(cur_page)+':', count_objects)
-            time.sleep(5)

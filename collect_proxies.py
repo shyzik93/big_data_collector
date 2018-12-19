@@ -42,9 +42,10 @@ class Proxies():
             if children[0].tag == 'th': continue
         
             ip = children[0].text_content()
+            port = children[1].text_content()
             has_https = children[6].text_content()
-        
-            if has_https == 'yes': self.proxies.append(ip)
+
+            if has_https == 'yes' and (port == '8080' or port == '80'): self.proxies.append('https://'+ip+':'+port)
             
         # more proxies)
         self.proxies += self.proxies
