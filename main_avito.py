@@ -3,10 +3,17 @@ import sqlite3
 import lxml.html as html
 import requests
 import time
+import os
 
 """ 
 Р�СЃС‚РѕСЂРёСЏ СЃС‚Р°С‚СЃСѓСЃР° (СЂР°Р·РјРµС‰РµРЅРѕ, Р·Р°РєСЂС‹С‚Рѕ, 
 РїРµСЂРµСЂР°Р·РјРµС‰РµРЅРѕ) """
+
+path_pages = os.path.join(os.getcwd(), "pages")
+path_data = os.path.join(os.getcwd(), "data")
+
+if not os.path.exists(path_pages): os.makedirs(path_pages)
+if not os.path.exists(path_data): os.makedirs(path_data)
 
 def get_categories(page):
     page = html.document_fromstring(page)
@@ -23,28 +30,47 @@ def save_objects(object_urls, cu, c):
     _ins_values = []
     ins_values = []
 
+    upd_sql = "UPDATE `realty` SET `realty_url`=? WHERE `realty_ext_id`=?"
+    upd_values = []
+
     for url in object_urls:
+
         is_absent = 0
 
         obj_id = int(url.split('_')[-1])
 
-        sel_sql = "SELECT `realty_id` FROM `realty` WHERE `realty_id`=?"
+        sel_sql = "SELECT `realty_id` FROM `realty` WHERE `realty_ext_id`=?"
         res = cu.execute(sel_sql, (obj_id,)).fetchall()
-        #print(dir(res))
+
         if len(res) == 0: is_absent = 1
         
-        if is_absent:
+        if is_absent: # for insert
             _ins_values.append("(?, ?)")
             ins_values.append(url)
             ins_values.append(obj_id)
+        else: # for update
+            upd_values.append((url, obj_id))
 
-            cu.execute(ins_sql + ",".join(_ins_values), ins_values)
-            c.commit()
+    # insert
+
+    if ins_values:
+        cu.execute(ins_sql + ",".join(_ins_values), ins_values)
+        c.commit()
+
+    # update
+
+    if upd_values:
+        for v in upd_values:
+            cu.execute(upd_sql, v)
+        c.commit()
 
 def get_count_pages(page):
     page = html.document_fromstring(page)
-    link = page.cssselect(".pagination-pages a.pagination-page")[-1]
-    url = link.get('href')
+    link = page.cssselect(".pagination-pages a.pagination-page")
+
+    if not link: return 1 # only one page, because the paginator is absent
+
+    url = link[-1].get('href')
     q = url.split('?')[-1]
     for p in q.split('&'):
         if p.startswith('p='): return int(p.split('=')[-1])
@@ -60,7 +86,7 @@ def get_objects2(link, cu, c, max_page=None):
 
 if __name__ == '__main__':
     # РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Р‘Р”
-    c = sqlite3.connect('data_avito.db')
+    c = sqlite3.connect(os.path.join(path_data, 'data_avito.db'))
     c.row_factory = sqlite3.Row
     cu = c.cursor()
     cu.executescript('''
@@ -71,7 +97,7 @@ if __name__ == '__main__':
         realty_m2_landing INTEGER,
         realty_count_rooms INTEGER,
         realty_url TEXT,
-        realty_ext_id INTEGER);
+        realty_ext_id INTEGER UNIQUE);
       CREATE TABLE IF NOT EXISTS status (
         status_id INTEGER PRIMARY KEY,
         status_name TEXT);
@@ -89,14 +115,14 @@ if __name__ == '__main__':
     domain_url = "https://avito.ru"
 
     r = requests.get(domain_url+"/eysk/nedvizhimost/")
+    print(r.status_code)
     cat_links = get_categories(r.content)
-
-    print(r.content)
 
     for i, cat_link in enumerate(cat_links):
         print(cat_link)
+        time.sleep(10)
 
-        #cat_path = "pages/"+cat_link.split('?')[0].replace('/', '_')+'.html'
+        #cat_path = os.path.join(path_pages, "pages/"+cat_link.split('?')[0].replace('/', '_')+'.html')
         #with open(cat_path, 'wb') as f:
         #    f.write(r.content)
 
@@ -108,5 +134,4 @@ if __name__ == '__main__':
         for cur_page in range(1, max_page+1):
             max_page, count_objects = get_objects2(domain_url+cat_link+'&p='+str(cur_page), cu, c, max_page)
             print('    objects on page '+str(cur_page)+':', count_objects)
-
-        exit()
+            time.sleep(5)
