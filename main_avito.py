@@ -41,6 +41,14 @@ def save_objects(object_urls, cu, c):
             cu.execute(ins_sql + ",".join(_ins_values), ins_values)
             c.commit()
 
+def get_count_pages(page):
+    page = html.document_fromstring(page)
+    link = page.cssselect(".pagination-pages a.pagination-page")[-1]
+    url = link.get('href')
+    q = url.split('?')[-1]
+    for p in q.split('&'):
+        if p.startswith('p='): return int(p.split('=')[-1])
+
 if __name__ == '__main__':
     # РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Р‘Р”
     c = sqlite3.connect('data_avito.db')
@@ -68,23 +76,35 @@ if __name__ == '__main__':
         realty_id INTEGER,
         realty_price INTEGER,
         realty_price_date INTEGER);''')
-    
+
     domain_url = "https://avito.ru"
 
     r = requests.get(domain_url+"/eysk/nedvizhimost/")
     cat_links = get_categories(r.content)
-    
+
     for i, cat_link in enumerate(cat_links):
+        print(cat_link)
         r = requests.get(domain_url+cat_link)
-        
-        cat_path = "pages/"+cat_link.split('?')[0].replace('/', '_')+'.html'
-        with open(cat_path, 'wb') as f:
-            f.write(r.content)
+
+        #cat_path = "pages/"+cat_link.split('?')[0].replace('/', '_')+'.html'
+        #with open(cat_path, 'wb') as f:
+        #    f.write(r.content)
 
         # get objects
 
+        max_page = get_count_pages(r.content)
+        print('    pages:', max_page)
+
         objects = get_objects(r.content)
         save_objects(objects, cu, c)
+        print('    objects on pages:', len(objects))
 
-        print(objects, len(objects))
+        for cur_page in range(1, max_page+1):
+            r = requests.get(domain_url+cat_link+'p='+str(i))
+
+            objects = get_objects(r.content)
+            save_objects(objects, cu, c)
+            print('    objects on page '+str(i)+':', len(objects))
+
+
         exit()
