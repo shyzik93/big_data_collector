@@ -11,7 +11,7 @@ import time
 def get_categories(page):
     page = html.document_fromstring(page)
     links = page.cssselect(".rubricator-submenu-18HMk a")
-    print(links)
+    return [link.get("href") for link in links]
 
 if __name__ == '__main__':
     # РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Р‘Р”
@@ -41,5 +41,15 @@ if __name__ == '__main__':
         realty_price INTEGER,
         realty_price_date INTEGER);''')
     
-    r = requests.get("https://avito.ru/eysk/nedvizhimost/")
-    print(r)
+    domain_url = "https://avito.ru"
+
+    r = requests.get(domain_url+"/eysk/nedvizhimost/")
+    cat_links = get_categories(r.content)
+    
+    for i, cat_link in enumerate(cat_links):
+        r = requests.get(domain_url+cat_link)
+        
+        cat_path = "pages/"+cat_link.split('?')[0].replace('/', '_')+'.html'
+        with open(cat_path, 'wb') as f:
+            f.write(r.content)
+
