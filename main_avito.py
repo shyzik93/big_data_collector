@@ -18,25 +18,28 @@ def get_objects(page):
     objects = page.cssselect('.item_table-header a[itemprop="url"]')
     return [o.get("href") for o in objects]
 
-def save_objects(object_urls, cu):
-    ins_sql += "INSERT INTO `realty` (`realty_url`, `realty_ext_id`) VALUES "
+def save_objects(object_urls, cu, c):
+    ins_sql = "INSERT INTO `realty` (`realty_url`, `realty_ext_id`) VALUES "
     _ins_values = []
     ins_values = []
 
     for url in object_urls:
         is_absent = 0
 
-        realty_id = int(url.split('_')[-1])
+        obj_id = int(url.split('_')[-1])
 
         sel_sql = "SELECT `realty_id` FROM `realty` WHERE `realty_id`=?"
-        r = cu.execute(sel_sql, realty_id)
+        res = cu.execute(sel_sql, (obj_id,)).fetchall()
+        #print(dir(res))
+        if len(res) == 0: is_absent = 1
         
         if is_absent:
-            _ins_values.add("(?, ?)")
-            ins_values.add(obj_url)
-            ins_values.add(obj_id)
+            _ins_values.append("(?, ?)")
+            ins_values.append(url)
+            ins_values.append(obj_id)
 
             cu.execute(ins_sql + ",".join(_ins_values), ins_values)
+            c.commit()
 
 if __name__ == '__main__':
     # РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Р‘Р”
@@ -51,7 +54,7 @@ if __name__ == '__main__':
         realty_m2_landing INTEGER,
         realty_count_rooms INTEGER,
         realty_url TEXT,
-        realty_ext_id INTEGER UNIQUE);
+        realty_ext_id INTEGER);
       CREATE TABLE IF NOT EXISTS status (
         status_id INTEGER PRIMARY KEY,
         status_name TEXT);
@@ -81,7 +84,7 @@ if __name__ == '__main__':
         # get objects
 
         objects = get_objects(r.content)
-        #save_objects(objects, cu)
+        save_objects(objects, cu, c)
 
         print(objects, len(objects))
         exit()
