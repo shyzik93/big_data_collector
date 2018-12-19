@@ -1,3 +1,4 @@
 data/*
 pages/*
 *.zip
+__pycache__/*
