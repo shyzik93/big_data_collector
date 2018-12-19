@@ -13,6 +13,31 @@ def get_categories(page):
     links = page.cssselect(".rubricator-submenu-18HMk a")
     return [link.get("href") for link in links]
 
+def get_objects(page):
+    page = html.document_fromstring(page)
+    objects = page.cssselect('.item_table-header a[itemprop="url"]')
+    return [o.get("href") for o in objects]
+
+def save_objects(object_urls, cu):
+    ins_sql += "INSERT INTO `realty` (`realty_url`, `realty_ext_id`) VALUES "
+    _ins_values = []
+    ins_values = []
+
+    for url in object_urls:
+        is_absent = 0
+
+        realty_id = int(url.split('_')[-1])
+
+        sel_sql = "SELECT `realty_id` FROM `realty` WHERE `realty_id`=?"
+        r = cu.execute(sel_sql, realty_id)
+        
+        if is_absent:
+            _ins_values.add("(?, ?)")
+            ins_values.add(obj_url)
+            ins_values.add(obj_id)
+
+            cu.execute(ins_sql + ",".join(_ins_values), ins_values)
+
 if __name__ == '__main__':
     # РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Р‘Р”
     c = sqlite3.connect('data_avito.db')
@@ -53,3 +78,10 @@ if __name__ == '__main__':
         with open(cat_path, 'wb') as f:
             f.write(r.content)
 
+        # get objects
+
+        objects = get_objects(r.content)
+        #save_objects(objects, cu)
+
+        print(objects, len(objects))
+        exit()
