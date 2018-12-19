@@ -97,9 +97,15 @@ if __name__ == '__main__':
       CREATE TABLE IF NOT EXISTS realty (
         realty_id INTEGER PRIMARY KEY,
         realty_price INTEGER,
-        realty_m2_building INTEGER,
-        realty_m2_landing INTEGER,
+        realty_m2_building INTEGER, --  / 10
+        realty_m2_landing INTEGER,  -- / 10
+        realty_m2_kitchen INTEGER,  -- / 10
+        realty_type_building TEXT,
+        realty_address TEXT,
+        realty_floor_total INTEGER
+        realty_floor INTEGER
         realty_count_rooms INTEGER,
+        realty_date DATETIME DEFAULT TIMESTAMP,
         realty_url TEXT,
         realty_ext_id INTEGER UNIQUE);
       CREATE TABLE IF NOT EXISTS status (
@@ -114,7 +120,7 @@ if __name__ == '__main__':
         realty_prices_id INTEGER PRIMARY KEY,
         realty_id INTEGER,
         realty_price INTEGER,
-        realty_price_date INTEGER);''')
+        realty_price_date DATETIME DEFAULT TIMESTAMP);''')
 
     domain_url = "https://avito.ru"
 
