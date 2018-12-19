@@ -49,6 +49,15 @@ def get_count_pages(page):
     for p in q.split('&'):
         if p.startswith('p='): return int(p.split('=')[-1])
 
+def get_objects2(link, cu, c, max_page=None):
+    print('   ', link)
+    r = requests.get(link)
+    objects = get_objects(r.content)
+    save_objects(objects, cu, c)
+
+    if max_page is None: max_page = get_count_pages(r.content)
+    return max_page, len(objects)
+
 if __name__ == '__main__':
     # РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Р‘Р”
     c = sqlite3.connect('data_avito.db')
@@ -82,9 +91,10 @@ if __name__ == '__main__':
     r = requests.get(domain_url+"/eysk/nedvizhimost/")
     cat_links = get_categories(r.content)
 
+    print(r.content)
+
     for i, cat_link in enumerate(cat_links):
         print(cat_link)
-        r = requests.get(domain_url+cat_link)
 
         #cat_path = "pages/"+cat_link.split('?')[0].replace('/', '_')+'.html'
         #with open(cat_path, 'wb') as f:
@@ -92,19 +102,11 @@ if __name__ == '__main__':
 
         # get objects
 
-        max_page = get_count_pages(r.content)
+        max_page, count_objects = get_objects2(domain_url+cat_link, cu, c)
         print('    pages:', max_page)
 
-        objects = get_objects(r.content)
-        save_objects(objects, cu, c)
-        print('    objects on pages:', len(objects))
-
         for cur_page in range(1, max_page+1):
-            r = requests.get(domain_url+cat_link+'p='+str(i))
-
-            objects = get_objects(r.content)
-            save_objects(objects, cu, c)
-            print('    objects on page '+str(i)+':', len(objects))
-
+            max_page, count_objects = get_objects2(domain_url+cat_link+'&p='+str(cur_page), cu, c, max_page)
+            print('    objects on page '+str(cur_page)+':', count_objects)
 
         exit()
