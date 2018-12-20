@@ -81,7 +81,7 @@ def get_count_pages(page):
 
 def get_objects2(link, cu, c, max_page=None):
     print('   ', link)
-    r = requests.get(link, proxies={'https':proxies+1})
+    r = requests.get(link)#, proxies={'https':proxies+1})
     objects = get_objects(r.content)
     save_objects(objects, cu, c)
 
@@ -89,7 +89,7 @@ def get_objects2(link, cu, c, max_page=None):
     return max_page, len(objects)
 
 if __name__ == '__main__':
-    # РёРЅРёС†РёР°Р»РёР·Р°С†РёСЏ Р‘Р”
+
     c = sqlite3.connect(os.path.join(path_data, 'data_avito.db'))
     c.row_factory = sqlite3.Row
     cu = c.cursor()
@@ -97,13 +97,17 @@ if __name__ == '__main__':
       CREATE TABLE IF NOT EXISTS realty (
         realty_id INTEGER PRIMARY KEY,
         realty_price INTEGER,
-        realty_m2_building INTEGER, --  / 10
-        realty_m2_landing INTEGER,  -- / 10
+        realty_m2_building INTEGER, --  / 10 (common square)
         realty_m2_kitchen INTEGER,  -- / 10
+        realty_m2_living INTEGER,  -- / 10
+        realty_m2_landing INTEGER,  -- / 10
         realty_type_building TEXT,
         realty_address TEXT,
-        realty_floor_total INTEGER
-        realty_floor INTEGER
+        realty_description TEXT,
+        realty_floor_total INTEGER,
+        realty_deal_type_id INTEGER,
+        realty_price_arenda_type TEXT,
+        realty_floor INTEGER,
         realty_count_rooms INTEGER,
         realty_date DATETIME DEFAULT TIMESTAMP,
         realty_url TEXT,
@@ -124,7 +128,8 @@ if __name__ == '__main__':
 
     domain_url = "https://avito.ru"
 
-    r = requests.get(domain_url+"/eysk/nedvizhimost/", proxies={'https':proxies+1})
+    r = requests.get(domain_url+"/eysk/nedvizhimost/")#, proxies={'https':proxies+1})
+    time.sleep(15)
     print(r.status_code)
     cat_links = get_categories(r.content)
 
@@ -142,4 +147,5 @@ if __name__ == '__main__':
 
         for cur_page in range(1, max_page+1):
             max_page, count_objects = get_objects2(domain_url+cat_link+'&p='+str(cur_page), cu, c, max_page)
+            time.sleep(7)
             print('    objects on page '+str(cur_page)+':', count_objects)
