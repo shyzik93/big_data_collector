@@ -97,11 +97,14 @@ if __name__ == '__main__':
       CREATE TABLE IF NOT EXISTS realty (
         realty_id INTEGER PRIMARY KEY,
         realty_price INTEGER,
+        realty_category TEXT,
         realty_m2_building INTEGER, --  / 10 (common square)
         realty_m2_kitchen INTEGER,  -- / 10
         realty_m2_living INTEGER,  -- / 10
         realty_m2_landing INTEGER,  -- / 10
+        realty_s_to_town INTEGER, -- / 10
         realty_type_building TEXT,
+        realty_type_object TEXT,
         realty_address TEXT,
         realty_description TEXT,
         realty_floor_total INTEGER,
@@ -109,9 +112,28 @@ if __name__ == '__main__':
         realty_price_arenda_type TEXT,
         realty_floor INTEGER,
         realty_count_rooms INTEGER,
-        realty_date DATETIME DEFAULT TIMESTAMP,
+        realty_wall_material INTEGER,
+        realty_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+        realty_user_id INTEGER,
+        realty_date_publication DATETIME,
         realty_url TEXT,
         realty_ext_id INTEGER UNIQUE);
+      CREATE TABLE IF NOT EXISTS user_type (
+        user_type_id INTEGER PRIMARY KEY,
+        user_type_name TEXT);
+      CREATE TABLE IF NOT EXISTS user (
+        user_id INTEGER PRIMARY KEY,
+        user_name TEXT,
+        user_type_id INTEGER,
+        user_url TEXT);
+      CREATE TABLE IF NOT EXISTS warning (
+        warning_id INTEGER PRIMARY KEY,
+        warning_name INTEGER);
+      CREATE TABLE IF NOT EXISTS realty_warning (
+        realty_warning_id INTEGER PRIMARY KEY,
+        warning_id INTEGER,
+        realty_id INTEGER,
+        realty_warning_date DATETIME DEFAULT CURRENT_TIMESTAMP);
       CREATE TABLE IF NOT EXISTS status (
         status_id INTEGER PRIMARY KEY,
         status_name TEXT);
@@ -119,22 +141,22 @@ if __name__ == '__main__':
         realty_status_id INTEGER PRIMARY KEY,
         real_id INTEGER,
         status_id INTEGER,
-        realty_status_date DATETIME DEFAULT TIMESTAMP);
+        realty_status_date DATETIME DEFAULT CURRENT_TIMESTAMP);
       CREATE TABLE IF NOT EXISTS realty_prices (
         realty_prices_id INTEGER PRIMARY KEY,
         realty_id INTEGER,
         realty_price INTEGER,
-        realty_price_date DATETIME DEFAULT TIMESTAMP);''')
+        realty_price_date DATETIME DEFAULT CURRENT_TIMESTAMP);''')
 
     domain_url = "https://avito.ru"
 
     r = requests.get(domain_url+"/eysk/nedvizhimost/")#, proxies={'https':proxies+1})
-    time.sleep(15)
     print(r.status_code)
     cat_links = get_categories(r.content)
 
     for i, cat_link in enumerate(cat_links):
         print(cat_link)
+        time.sleep(15)
 
         #cat_path = os.path.join(path_pages, "pages/"+cat_link.split('?')[0].replace('/', '_')+'.html')
         #with open(cat_path, 'wb') as f:
