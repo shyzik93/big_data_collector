@@ -14,6 +14,7 @@ import time
 import os
 
 import config_site_avito as cs
+import parser_tools as pt
 
 def get_obj_links_from_page(page):
     page = html.document_fromstring(page)
@@ -24,7 +25,7 @@ def get_obj_links_from_page(page):
 
 if __name__ == '__main__':
 
-    curIndex = cs.CurIndex(os.path.join(cs.path_data, 'cur_user_id.txt'))
+    curIndex = pt.CurIndex(os.path.join(cs.path_data, 'cur_user_id.txt'))
     cur_user_id = curIndex.get()
 
     c, cu = cs.get_db()

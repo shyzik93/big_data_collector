@@ -13,6 +13,7 @@ import cv2
 import numpy as np
 
 import config_site_avito as cs
+import parser_tools as pt
 
 # https://habr.com/company/oleg-bunin/blog/425471/
 # installing: https://www.asozykin.ru/computer_vision/2017/12/08/How-to-Install-OpenCV-in-Python.html
@@ -131,8 +132,8 @@ class ImagePhoneProcessor():
 
 if __name__ == '__main__':
 
-    path_bin = '/root/parsers/data/images_sets'
-    path_base = '/root/parsers/data/images'
+    path_bin = os.path.join(cs.path_data, 'images_sets')
+    path_base = os.path.join(cs.path_data, 'images')
 
     figures = []
 

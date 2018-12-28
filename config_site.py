@@ -19,13 +19,18 @@ from cur_index import CurIndex
 
 #path_data = os.path.join(os.getcwd(), "data")
 #if not os.path.exists(path_pages): os.makedirs(path_pages)
-path_data = "/root/parsers/data"
+
+path_main = os.path.dirname(__file__)
+
+path_data = os.path.join(path_main, "data")
 if not os.path.exists(path_data): os.makedirs(path_data)
-path_templates = "/root/parsers/templates"
+path_templates = os.path.join(path_main, "templates")
 if not os.path.exists(path_templates): os.makedirs(path_templates)
 
+path_db = os.path.join(path_data, 'data_avito.db')
+
 def get_db():
-    c = sqlite3.connect(os.path.join(path_data, 'data_avito.db'))
+    c = sqlite3.connect(path_db)
     c.row_factory = sqlite3.Row
     cu = c.cursor()
     
@@ -129,20 +134,3 @@ def get_db():
       ''')
     
     return c, cu
-
-class DBHistory():
-
-    def __init__(self, c, cu):
-        self.cu = cu
-        self.c = c
-
-    def save(self, realty_id, table_name, value_name, new_value):
-        sql = "SELECT * FROM `"+table_name+"` WHERE `history_realty_id`=? ORDER BY `history_date` DESC LIMIT 1"
-        res2 = self.cu.execute(sql, (realty_id,)).fetchall()
-        if res2: res2 = res2[0]
-        if not res2 or res2[value_name] != new_value:
-            sql = "INSERT INTO `"+table_name+"` (`history_realty_id`, `"+value_name+"`) VALUES (?, ?); "
-            self.cu.execute(sql, (realty_id, new_value))
-
-    def insert_and_commit(self):
-        self.c.commit()

@@ -16,6 +16,7 @@ import datetime
 import argparse
 
 import config_site_avito as cs
+import parser_tools as pt
 
 cli_parser = argparse.ArgumentParser(description='')
 cli_parser.add_argument('--only-empty', default=None)
@@ -25,13 +26,13 @@ cli_args = cli_parser.parse_args()
 #TODO collect info about publicator (fio, name of organization)
 
 if __name__ == '__main__':
-    curIndex = cs.CurIndex(os.path.join(cs.path_data, 'cur_obj_id.txt'))
+    curIndex = pt.CurIndex(os.path.join(cs.path_data, 'cur_obj_id.txt'))
     cur_obj_id = curIndex.get()
 
     c, cu = cs.get_db()
     c2, cu2 = cs.get_db()
-    proxies = cs.collect_proxies.Proxies(c, cu, 'avito')
-    history = cs.DBHistory(c2, cu2)
+    proxies = pt.Proxies(c, cu, 'avito', cs.path_data)
+    history = pt.DBHistory(c2, cu2)
 
     #sql = "SELECT `realty_price`, `realty_id`, `realty_url`, `realty_ext_id` FROM `realty` WHERE `realty_id`>=? AND `realty_is_redirect` IS NULL AND `site`=? "
     sql = "SELECT `realty_price`, `realty_id`, `realty_url`, `realty_ext_id` FROM `realty` WHERE `realty_id`>=? AND `site`=? "

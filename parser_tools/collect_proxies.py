@@ -18,7 +18,7 @@ import datetime
 
 class _ProxiesDB():
     
-    def __init__(self, c, cu, site):
+    def __init__(self, c, cu, site, path_data):
         self.c = c
         self.cu = cu
         self.site = site
@@ -26,7 +26,7 @@ class _ProxiesDB():
         self.proxies = []
         self.cur_proxy_index = 0
         
-        self.path_log = '/root/parsers/data/proxies_log'+datetime.datetime.today().strftime('-%Y-%m-%d_%T').replace(':', '-')+'.txt'
+        self.path_log = os.path.join(path_data, 'proxies_log'+datetime.datetime.today().strftime('-%Y-%m-%d_%T').replace(':', '-')+'.txt')
         
         self.s = requests.Session()
         
@@ -177,8 +177,8 @@ class _ProxiesDB():
 
 class _Proxies(_ProxiesDB):
 
-    def __init__(self, c, cu, site, is_auto_update=True):
-        _ProxiesDB.__init__(self, c, cu, site)
+    def __init__(self, c, cu, site, path_data, is_auto_update=True):
+        _ProxiesDB.__init__(self, c, cu, site, path_data)
 
         self.is_auto_update = is_auto_update
 
@@ -223,8 +223,8 @@ class _Proxies(_ProxiesDB):
 
 class Proxies(_Proxies):
 	
-    def __init__(self, c, cu, site, is_auto_update=True):
-        _Proxies.__init__(self, c, cu, site, is_auto_update)
+    def __init__(self, c, cu, site, path_data, is_auto_update=True):
+        _Proxies.__init__(self, c, cu, site, path_data, is_auto_update)
         
         self.update_list()
 

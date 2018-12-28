@@ -10,6 +10,7 @@ import time
 import os
 import requests
 import config_site_avito as cs
+import parser_tools as pt
 import process_images_avito as pi
 import urllib3
 
@@ -97,13 +98,13 @@ def get_driver(proxy_str):
 
 if __name__ == '__main__':
 
-    curIndex = cs.CurIndex(os.path.join(cs.path_data, 'cur_user_id2.txt'))
+    curIndex = pt.CurIndex(os.path.join(cs.path_data, 'cur_user_id2.txt'))
     cur_id = curIndex.get()
 
     c, cu = cs.get_db()
     c2, cu2 = cs.get_db()
     
-    proxies = cs.collect_proxies.Proxies(c2, cu2, 'avito')
+    proxies = pt.Proxies(c2, cu2, 'avito', cs.path_data)
 
     driver = get_driver(proxies+0)
 

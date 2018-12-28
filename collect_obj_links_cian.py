@@ -14,6 +14,7 @@ import time
 import os
 
 import config_site_avito as cs
+import parser_tools as pt
 
 def get_categories(page):
     page = html.document_fromstring(page)
@@ -24,7 +25,7 @@ def get_categories(page):
 if __name__ == '__main__':
 
     c, cu = cs.get_db()
-    proxies = collect_proxies.Proxies(c, cu)
+    proxies = pt.Proxies(c, cu)
     
     r = proxies.open_url(cs.domain_url, cs.is_blocked)
     print(r.status_code)

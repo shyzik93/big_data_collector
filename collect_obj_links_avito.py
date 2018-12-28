@@ -15,6 +15,7 @@ import os
 import argparse
 
 import config_site_avito as cs
+import parser_tools as pt
 
 def get_categories(page):
     page = html.document_fromstring(page)
@@ -55,7 +56,7 @@ if __name__ == '__main__':
     cli_args = cli_parser.parse_args()
 
     c, cu = cs.get_db()
-    proxies = cs.collect_proxies.Proxies(c, cu, 'avito')
+    proxies = pt.Proxies(c, cu, 'avito', cs.path_data)
 
     r = proxies.open_url(cs.domain_url+"/"+cli_args.settlement+"/nedvizhimost/", cs.is_blocked)
     print(r.status_code)
