@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+
+"""
+Author: Polyakov Konstantin
+Date: 2018-12-19
+Place: Yeysk, Russia
+"""
+
+import re
+import sqlite3
+import lxml.html as html
+import requests
+import time
+import os
+import datetime
+import argparse
+
+from jinja2 import Environment, FileSystemLoader#, select_autoescape
+
+import config_site_avito as cs
+
+# -----------------------------
+# ---- Parsing args
+
+deal_types = {
+    'buy': 1, 'sell': 2, 'give_rent':3, 'get_rent': 4
+}
+categories = ['flat', 'room', 'house', 'land', 'garage', 'business', 'abroad']
+
+cli_parser = argparse.ArgumentParser(description='Script for getting analitic info about real estates. Author: Polyakov Konstantin')
+cli_parser.add_argument('--category', choices=categories, default=None)
+cli_parser.add_argument('--deal', choices=deal_types.keys(), default=None)
+cli_parser.add_argument('--m2-common', default=None, help='common square of flat or house', type=int)
+cli_parser.add_argument('--count-rooms', default=None, help='count rooms of flat or house', type=int)
+cli_parser.add_argument('--user-type', default=None, help='user_type')
+
+cli_parser.add_argument('--order-dir', choices=['desc', 'asc'], default='DESC')
+cli_parser.add_argument('--c', default='10', type=int)
+
+cli_args = cli_parser.parse_args()
+
+if __name__ == '__main__':
+
+    env = Environment(
+        loader=FileSystemLoader(cs.path_templates)
+        #autoescape=select_autoescape(['html', 'xml'])
+    )
+
+    template_vars = {}
+    template = env.get_template('object_list.html')
+
+    c = sqlite3.connect(os.path.join(cs.path_data, 'data_avito.db'))
+    c.row_factory = sqlite3.Row
+    cu = c.cursor()
+
+    where = []
+    values = []
+
+    where.append("`realty`.`realty_user_id` = `user`.`user_id`")
+    where.append("`user`.`user_type_id` = `user_type`.`user_type_id`")
+    where.append("`realty`.`realty_date_publication` is not NULL")
+
+    if cli_args.category:
+        where.append(" `realty_category` = ? ")
+        values.append(cli_args.category)
+    if cli_args.deal:
+        where.append(" `realty_deal_type_id` = ? ")
+        values.append(deal_types[cli_args.deal])
+    if cli_args.m2_common:
+        where.append("`realty_m2_building` < ? AND `realty_m2_building` > ? ")
+        values.append((cli_args.m2_common + 8) * 10)
+        values.append((cli_args.m2_common - 8) * 10)
+    if cli_args.count_rooms:
+        where.append(" `realty_count_rooms` = ? ")
+        values.append(cli_args.count_rooms)
+    if cli_args.user_type:
+        where.append("`user_type`.`user_type_name`=?")
+        values.append(cli_args.user_type)
+
+
+    sql = "SELECT * FROM `realty`, `user`, `user_type` WHERE "#`realty_price_arenda_type` is NULL AND "
+    sql += " AND ".join(where) + " ORDER BY `realty_date_publication` "+cli_args.order_dir+" LIMIT "+str(cli_args.c)
+    res = cu.execute(sql, tuple(values))
+
+    objects = []
+    
+    for row in res:
+        
+        print(
+            str(row['realty_id']).rjust(6),
+            cs.transform_price(row['realty_price']).rjust(13),
+            row['realty_date_publication'].ljust(21).rjust(24),
+            row['realty_url']
+        )

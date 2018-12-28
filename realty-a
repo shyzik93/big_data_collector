@@ -1,0 +1,243 @@
+#!/usr/bin/env python3
+
+"""
+Author: Polyakov Konstantin
+Date: 2018-12-19
+Place: Yeysk, Russia
+"""
+
+import re
+import sqlite3
+import lxml.html as html
+import requests
+import time
+import os
+import datetime
+import argparse
+import math
+import csv
+
+from jinja2 import Environment, FileSystemLoader#, select_autoescape
+
+import config_site_avito as cs
+
+# -----------------------------
+# ---- Parsing args
+
+deal_types = {
+    'buy': 1, 'sell': 2, 'give_rent':3, 'get_rent': 4
+}
+categories = ['flat', 'room', 'house', 'land', 'garage', 'business', 'abroad']
+
+cli_parser = argparse.ArgumentParser(description='Script for getting analitic info about real estates. Author: Polyakov Konstantin')
+cli_parser.add_argument('category', choices=categories)
+cli_parser.add_argument('deal', choices=deal_types.keys())
+cli_parser.add_argument('--m2-common', default=None, help='common square of flat or house', type=int)
+cli_parser.add_argument('--count-rooms', default=None, help='count rooms of flat or house', type=int)
+cli_parser.add_argument('--user-type', default=None, help='user_type')
+
+cli_parser.add_argument('--pub-days', default=None, help='days of publication')
+
+cli_parser.add_argument('--use-filter', default=None, help='filter of agents by count of realties', type=int)
+
+cli_parser.add_argument('--lat', default=None, help='')
+cli_parser.add_argument('--lon', default=None, help='')
+cli_parser.add_argument('--l', default=None, help='')
+
+cli_parser.add_argument('--output-path', default=None, help='')
+
+cli_parser.add_argument('--settlement', default=None, help='')
+
+cli_parser.add_argument('--only-with-phone', default=None, help='')
+
+cli_parser.add_argument('--type-output', default='human', help='')
+#cli_parser.add_argument('-f', '--file', dest='files', action='append', default=['index.html'], help='list of "*.html" files for transformation. All local links in this files will include in this list automatically.')
+
+cli_args = cli_parser.parse_args()
+
+# --------------------------
+
+
+# ./realty-a flat sell --user-type "Частное лицо" --lat 46.715065 --lon 38.281086 --l 1000
+
+if __name__ == '__main__':
+
+    env = Environment(
+        loader=FileSystemLoader(cs.path_templates)
+        #autoescape=select_autoescape(['html', 'xml'])
+    )
+
+    template_vars = {}
+    template = env.get_template('object_list.html')
+
+    c = sqlite3.connect(os.path.join(cs.path_data, 'data_avito.db'))
+    c.row_factory = sqlite3.Row
+    cu = c.cursor()
+
+    c2= sqlite3.connect(os.path.join(cs.path_data, 'data_avito.db'))
+    c2.row_factory = sqlite3.Row
+    cu2 = c2.cursor()
+
+    user_type = 'Частное лицо'
+    
+    values = []
+    where = []
+    
+    if cli_args.output_path is None: output_path = os.path.join(cs.path_data, 'A_for_obj.html')
+    else: output_path = cli_args.output_path
+
+    def closer_than(lat1, lon1, lat2, lon2, m2):
+        if not lat1 or not lon1: return False
+        lat1 = float(lat1)
+        lon1 = float(lon1)
+        lat2 = float(lat2)
+        lon2 = float(lon2)
+        m2 = float(m2)
+
+        lat = abs(lat1-lat2)*1000000
+        lon = abs(lon1-lon2)*1000000
+        l = lat**2 + lon**2
+        m1 = math.sqrt(l)/1000000*95
+        print(m1, m2)
+        return m1 <= m2
+    
+    sqlite3.enable_callback_tracebacks(True)
+    c.create_function('closer_than', 5, closer_than)
+
+    where.append("`realty`.`realty_user_id` = `user`.`user_id`")
+    where.append("`user`.`user_type_id` = `user_type`.`user_type_id`")
+    
+    if cli_args.lat and cli_args.lon and cli_args.l:
+        where.append(" closer_than(realty_lat, realty_lon, ?, ?, ?) ")
+        values.append(cli_args.lat)
+        values.append(cli_args.lon)
+        values.append(cli_args.l)
+    if cli_args.m2_common:
+        where.append("`realty_m2_building` <= ? AND `realty_m2_building` >= ? ")
+        values.append((cli_args.m2_common + 8) * 10)
+        values.append((cli_args.m2_common - 8) * 10)
+    if cli_args.count_rooms:
+        where.append(" `realty_count_rooms` = ? ")
+        values.append(cli_args.count_rooms)
+    if cli_args.settlement:
+        where.append(" `realt_url` LIKE ?")
+        values.append('/'+cli_args.settlement+'%')
+    if cli_args.category:
+        where.append(" `realty_category` = ? ")
+        values.append(cli_args.category)
+    if cli_args.deal:
+        where.append(" `realty_deal_type_id` = ? ")
+        values.append(deal_types[cli_args.deal])
+    if cli_args.user_type:
+        where.append("`user_type`.`user_type_name`=?")
+        values.append(cli_args.user_type)
+    if cli_args.use_filter:
+        where.append(" `realty_user_id` IN (SELECT `user_id` FROM `user` WHERE (SELECT COUNT(realty_id) FROM `realty` WHERE `realty`.`realty_user_id`=`user`.`user_id`) < ?) ")
+        #where.append(" (SELECT COUNT(realty_id) FROM `realty`, `user` WHERE `realty`.`realty_user_id`=`user`.`user_id`) < 100 ")
+        values.append(cli_args.use_filter)
+
+    if cli_args.only_with_phone:
+        where.append("`user_contact`.`user_contact_user_id`=`user`.user_id")
+
+    select = [
+        "(SELECT COUNT(realty_id) FROM `realty` WHERE `realty`.`realty_user_id`=`user`.`user_id`) as `realty_count`",
+        "*"
+    ]
+
+    tables = ['`user`', '`realty`']
+    if cli_args.only_with_phone: tables.append('`user_contact`')
+
+    if cli_args.only_with_phone:
+        order_by = "`user_contact`.`user_contact_data`"
+    else:
+        order_by = "`realty_price`"
+
+    sql = "SELECT "+(",".join(select))+" FROM "+(','.join(tables))+", `user_type` WHERE "#`realty_price_arenda_type` is NULL AND "
+    sql += " AND ".join(where) + " ORDER BY "+order_by
+    print(sql, '\n', values)
+    #sql = "select * from realty, user WHERE user.user_id=realty.realty_user_id AND realty.realty_price"
+    res = cu.execute(sql, tuple(values))
+    
+    average_price = 0
+    total_price = 0
+    count_objects = 0
+    
+    if cli_args.type_output == 'human':
+        objects = []
+    elif cli_args.type_output == 'machine':
+        f = open(cli_args.output_path, 'w')
+        objects = csv.writer(f)
+        
+    for row in res:
+
+        #path_phone = os.path.join(cs.path_data, 'images', str(row['realty_user_id']))+'.txt'
+
+        #if cli_args.only_with_phone and not os.path.exists(path_phone): continue
+
+        warning = '';
+        sql = "SELECT * FROM `realty_warning`, `warning` WHERE `realty_warning`.`warning_id`=`warning`.`warning_id` AND `realty_warning`.`realty_id`=? ORDER BY `realty_warning`.`realty_warning_date` DESC LIMIT 1"
+        res2 = cu2.execute(sql, (row['realty_id'],)).fetchall()
+        if res2: warning = res2[0]['warning_name']
+            
+        date_publ = row['realty_date_publication']
+        if date_publ is not None: date_publ = date_publ.split()[0]
+
+        date_pickup = row['realty_date']
+        if date_pickup is not None: date_pickup = date_pickup.split()[0]
+
+        if date_publ:
+            date_publ2 = datetime.date(int(date_publ[0:4]), int(date_publ[5:7]), int(date_publ[8:]))
+            period_publ = datetime.date.today() - date_publ2
+            period_publ = period_publ.days
+        else: period_publ = 0
+
+        if row['realty_price']: total_price += row['realty_price']
+        count_objects += 1
+            
+        row = dict(row)
+
+        row['realty_price'] = cs.transform_price(row['realty_price'])
+        if row['realty_m2_building']: row['realty_m2_building'] /= 10
+        else: row['realty_m2_building'] = 0
+        if row['realty_m2_landing']: row['realty_m2_landing'] /= 10
+        else: row['realty_m2_landing'] = 0
+        row['date_publ'] = date_publ
+        row['date_pickup'] = date_pickup
+        row['period_publ'] = period_publ
+        row['realty_address'] = row['realty_address'].replace('Краснодарский край', '')       
+        row['warning'] = warning
+
+        row['user_phone'] = ''
+        if 'user_contact_data' in row:
+            row['user_phone'] = row['user_contact_data']
+
+        #if os.path.exists(path_phone):
+        #    with open(path_phone) as f:
+        #        row['user_phone'] = f.read()
+
+        if cli_args.type_output == 'human':
+            objects.append(row)
+        elif cli_args.type_output == 'machine':
+            objects.writerow([
+                row['user_id'],
+                row['user_name'],
+                row['user_type_name'],
+                row['user_phone'],
+                row['realty_id'],
+                row['realty_address'],
+                row['realty_url'],
+            ])
+
+    if cli_args.type_output == 'human':
+
+        template_vars['count_objects'] = count_objects
+        template_vars['average'] = cs.transform_price(total_price // count_objects)
+        template_vars['objects'] = objects
+        template_vars['domain_url'] = cs.domain_url
+        template_vars['cli_args'] = cli_args
+
+        with open(output_path, 'w') as f: f.write(template.render(template_vars))
+        
+    elif cli_args.type_output == 'machine':
+    	
+        f.close()

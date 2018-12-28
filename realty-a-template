@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+
+output_dir="/root/parsers/data/output/"
+ext="csv"
+type_output="machine"
+
+./realty-a flat buy  --user-type "Частное лицо" --output-path $output_dir/flat-owners.$ext  --only-with-phone 1 --type-output $type_output
+./realty-a house buy --user-type "Частное лицо" --output-path $output_dir/house-owners.$ext --only-with-phone 1 --type-output $type_output
+./realty-a land buy  --user-type "Частное лицо" --output-path $output_dir/land-owners.$ext  --only-with-phone 1 --type-output $type_output
+
+./realty-a flat buy  --user-type "Агентство"    --output-path $output_dir/flat-agents.$ext  --only-with-phone 1 --type-output $type_output
+./realty-a house buy --user-type "Агентство"    --output-path $output_dir/house-agents.$ext --only-with-phone 1 --type-output $type_output
+./realty-a land buy  --user-type "Агентство"    --output-path $output_dir/land-agents.$ext  --only-with-phone 1 --type-output $type_output

@@ -1,0 +1,143 @@
+{# maps: https://habr.com/company/yandex/blog/243665/ #}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <script src="//api-maps.yandex.ru/2.1/?lang=ru_RU" type="text/javascript"></script>
+    <script type="text/javascript">
+        ymaps.ready(init);
+
+        function init () {
+            var myMap = new ymaps.Map('map', {
+                center: [55.76, 37.64], 
+                zoom: 10
+            });
+        }
+    </script>
+
+</head>
+
+<body>
+<style>
+    td {padding:2px 5px;}
+    .block_target {padding-left: 20px;}
+</style>
+
+
+Анализ для следующей недвижимости:
+<div class='block_target'>
+    Категория: {{ cli_args.category }}<br>
+
+    {% if cli_args.category in ['flat', 'house'] %} Общая площадь помещения: {{ cli_args.m2_building }}<br>{% endif %}
+    {% if cli_args.category in ['land', 'house'] %} Площадь участка: {{ cli_args.m2_land }}<br>{% endif %}
+
+    {% if cli_args.category in ['flat', 'house'] %} Кол-во комнат: {{ cli_args.count_rooms }}<br>{% endif %}
+
+    </div>
+<br><br>
+
+<form onchange='calc_average(this)'>
+<table class='objects'>
+
+    <tr>
+
+        <th></th>
+        <th>Стоимость, руб.</th>
+        {% if cli_args.category in ['flat', 'house'] %}<th>Площадь, м2</th>{% endif %}
+        {% if cli_args.category in ['land', 'house'] %}<th>Площадь участка, га</th>{% endif %}
+        <th>Комнат</th>
+        <th>Ссылка</th>
+        {# <th>Попало в базу</th>#}
+        {# <th>Размещено</th>#}
+        <th>Размещено</th>
+        <th>Разместил</th>
+        <th>Координаты</th>
+        <th>Адрес</th>
+        <th>Телефон</th>
+        <th>Комментарий</th>
+    
+    </tr>
+
+    {% for obj in objects %}
+
+        <tr {% if obj.realty_is_redirect %} style="background:#ffeeee;" {% endif %}>
+
+            <td><input type='checkbox' class='is_use' checked></td>
+
+            <td class='price'>
+                {{ obj.realty_price }}
+                {% if obj.realty_price_arenda_type == 'month' %} за сутки{% endif %}
+                {% if obj.realty_price_arenda_type == 'month' %} за месяц{% endif %}
+                {% if obj.realty_price_arenda_type == 'month' %} за год{% endif %}
+            </td>
+
+            {% if cli_args.category in ['flat', 'house'] %}<td>{{ obj.realty_m2_building }}</td>{% endif %}
+            {% if cli_args.category in ['land', 'house'] %}<td>{{ obj.realty_m2_landing }}</td>{% endif %}
+
+            <td>{{ obj.realty_count_rooms }}</td>
+
+
+            <td><a target='_blank' href='{{ domain_url }}{{ obj.realty_url }}'>
+            Посмотреть на Avito
+            </a></td>
+
+            {#<td>{{ obj.date_pickup }}</td>#}
+            {#<td>{{ obj.date_publ }}</td>#}
+            <td>{{ obj.period_publ }} дней</td>
+
+            <td>
+                {% if obj.user_url %}
+                    <a target='_blank' href='{{ domain_url }}{{ obj.user_url}}'>{{ obj.user_name }}</a>
+                    ({{obj.user_type_name }})
+                {% else %}
+                    {{ obj.user_name }}
+                    ({{ obj.user_type_name }})
+                {% endif %}
+                ({{ obj.realty_count }})
+            </td>
+
+            <td>{{ obj.realty_lat }} {{ obj.realty_lon }}</td>
+            <td>{{ obj.realty_address }}</td>
+            {#<td><img width="100px" height="auto" src="{{ obj.user_phone }}"/></td>#}
+            <td>{{ obj.user_phone }}</td>
+            <td>{{ obj.warning }}</td>
+        </tr>
+
+    {% endfor %}
+
+    </table>
+</form>
+
+<br><br>
+
+<div id='results'>
+    Всего объектов: <span class='count'>{{ count_objects }}</span><br>
+    Средняя цена: <span class='average'>{{ average }}</span><br>
+</div>
+
+<script>
+function calc_average(form) {
+    let total = 0;
+    let count = 0;
+    let trs = document.querySelectorAll('.objects tr');
+    for (let tr of trs) {
+        if (tr.firstElementChild.tagName === 'TH') continue;
+        let is_use = tr.querySelector('.is_use').checked;
+        let price = tr.querySelector('.price').innerHTML.trim().replace(/\s/g, '');
+        if (is_use) {
+            total += parseInt(price);
+            count += 1;
+        }
+    }
+    let res = document.getElementById('results');
+    res.querySelector('.count').innerHTML = count;
+    res.querySelector('.average').innerHTML = Math.round(total / count);
+}
+</script>
+
+<div id="map"></div>
+
+</body>
+</html>

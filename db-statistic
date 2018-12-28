@@ -1,0 +1,110 @@
+#!/usr/bin/env bash
+
+# Author: Polyakov Konstantin
+# Date: 2018-12-27
+# Place: Yeysk, Russia
+
+# https://habr.com/company/ua-hosting/blog/281519/
+# https://habr.com/company/ua-hosting/blog/434342/
+
+COUNT_REALTY_TOTAL=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty WHERE 1'`
+COUNT_REALTY_FULL=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty WHERE realty_price IS NOT NULL'`
+COUNT_REALTY_ONLY_URL=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty WHERE realty_price IS NULL'`
+COUNT_REALTY_REDIRECTED=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty WHERE realty_is_redirect=1'`
+
+COUNT_REALTY_FLAT=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="flat"'`
+COUNT_REALTY_FLAT_USERTYPE1=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="flat" AND  user_type.user_type_name="Частное лицо"'`
+COUNT_REALTY_FLAT_USERTYPE1_2=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="flat" AND  user_type.user_type_name="Частное лицо" AND realty.realty_deal_type_id=1'`
+COUNT_REALTY_FLAT_USERTYPE1_3=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="flat" AND  user_type.user_type_name="Частное лицо" AND realty.realty_deal_type_id=4'`
+COUNT_REALTY_FLAT_USERTYPE2=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="flat" AND  user_type.user_type_name="Агентство"'`
+COUNT_REALTY_FLAT_USERTYPE2_2=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="flat" AND  user_type.user_type_name="Агентство" AND realty.realty_deal_type_id=1'`
+COUNT_REALTY_FLAT_USERTYPE2_3=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="flat" AND  user_type.user_type_name="Агентство" AND realty.realty_deal_type_id=4'`
+COUNT_REALTY_FLAT_USERTYPE3=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="flat" AND  user_type.user_type_name="Контактное лицо"'`
+COUNT_REALTY_FLAT_USERTYPE4=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="flat" AND  user_type.user_type_name="Покупатель"'`
+COUNT_REALTY_FLAT_USERTYPE5=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="flat" AND  user_type.user_type_name="Арендодатель"'`
+
+COUNT_REALTY_HOUSE=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="house"'`
+COUNT_REALTY_HOUSE_USERTYPE1=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="house" AND  user_type.user_type_name="Частное лицо"'`
+COUNT_REALTY_HOUSE_USERTYPE1_2=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="house" AND  user_type.user_type_name="Частное лицо" AND realty.realty_deal_type_id=1'`
+COUNT_REALTY_HOUSE_USERTYPE1_3=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="house" AND  user_type.user_type_name="Частное лицо" AND realty.realty_deal_type_id=4'`
+COUNT_REALTY_HOUSE_USERTYPE2=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="house" AND  user_type.user_type_name="Агентство"'`
+COUNT_REALTY_HOUSE_USERTYPE2_2=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="house" AND  user_type.user_type_name="Агентство" AND realty.realty_deal_type_id=1'`
+COUNT_REALTY_HOUSE_USERTYPE2_3=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="house" AND  user_type.user_type_name="Агентство" AND realty.realty_deal_type_id=4'`
+COUNT_REALTY_HOUSE_USERTYPE3=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="house" AND  user_type.user_type_name="Контактное лицо"'`
+COUNT_REALTY_HOUSE_USERTYPE4=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="house" AND  user_type.user_type_name="Покупатель"'`
+COUNT_REALTY_HOUSE_USERTYPE5=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="house" AND  user_type.user_type_name="Арендодатель"'`
+
+COUNT_REALTY_LAND=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="land"'`
+COUNT_REALTY_LAND_USERTYPE1=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="land" AND  user_type.user_type_name="Частное лицо"'`
+COUNT_REALTY_LAND_USERTYPE1_2=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="land" AND  user_type.user_type_name="Частное лицо" AND realty.realty_deal_type_id=1'`
+COUNT_REALTY_LAND_USERTYPE1_3=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="land" AND  user_type.user_type_name="Частное лицо" AND realty.realty_deal_type_id=4'`
+COUNT_REALTY_LAND_USERTYPE2=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="land" AND  user_type.user_type_name="Агентство"'`
+COUNT_REALTY_LAND_USERTYPE2_2=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="land" AND  user_type.user_type_name="Агентство" AND realty.realty_deal_type_id=1'`
+COUNT_REALTY_LAND_USERTYPE2_3=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="land" AND  user_type.user_type_name="Агентство" AND realty.realty_deal_type_id=4'`
+COUNT_REALTY_LAND_USERTYPE3=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="land" AND  user_type.user_type_name="Контактное лицо"'`
+COUNT_REALTY_LAND_USERTYPE4=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="land" AND  user_type.user_type_name="Покупатель"'`
+COUNT_REALTY_LAND_USERTYPE5=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty, user, user_type WHERE user.user_id=realty.realty_user_id AND user.user_type_id=user_type.user_type_id AND realty.realty_category="land" AND  user_type.user_type_name="Арендодатель"'`
+
+
+COUNT_USER_TOTAL=`sqlite3 data/data_avito.db 'SELECT COUNT(user_id) FROM user WHERE 1'`
+COUNT_USER_WITH_PHONE_FILE=`ls -l 'data/images' | grep "^-" | wc -l`
+COUNT_USER_WITH_PHONE_BASE=`sqlite3 data/data_avito.db 'SELECT COUNT(user_contact_id) FROM user_contact WHERE 1 '`
+
+COUNT_PROXY_TOTAL=`sqlite3 data/data_avito.db 'SELECT COUNT(proxy_id) FROM proxy WHERE 1'`
+COUNT_PROXY_UNUSED=`sqlite3 data/data_avito.db 'SELECT COUNT(proxy_id) FROM proxy WHERE site_avito IS NULL'`
+COUNT_PROXY_USED=`sqlite3 data/data_avito.db 'SELECT COUNT(proxy_id) FROM proxy WHERE site_avito IS NOT NULL'`
+
+echo ""
+
+echo "Недвижимость"
+echo "    Всего: $COUNT_REALTY_TOTAL"
+echo "    С информацией: $COUNT_REALTY_FULL"
+echo "    Только ссылки: $COUNT_REALTY_ONLY_URL"
+echo "    Завершённые: $COUNT_REALTY_REDIRECTED"
+echo "    Квартиры: $COUNT_REALTY_FLAT"
+echo "        от частных лиц: $COUNT_REALTY_FLAT_USERTYPE1 (продажа - $COUNT_REALTY_FLAT_USERTYPE1_2, сдача аренды - $COUNT_REALTY_FLAT_USERTYPE1_3)"
+echo "        от агентств: $COUNT_REALTY_FLAT_USERTYPE2 (продажа - $COUNT_REALTY_FLAT_USERTYPE2_2, сдача аренды - $COUNT_REALTY_FLAT_USERTYPE2_3)"
+echo "        от контактных лиц: $COUNT_REALTY_FLAT_USERTYPE3"
+echo "        от покупателей: $COUNT_REALTY_FLAT_USERTYPE4"
+echo "        от арендодателя: $COUNT_REALTY_FLAT_USERTYPE5"
+echo "    Дома: $COUNT_REALTY_HOUSE"
+echo "        от частных лиц: $COUNT_REALTY_HOUSE_USERTYPE1 (продажа - $COUNT_REALTY_HOUSE_USERTYPE1_2, сдача аренды - $COUNT_REALTY_HOUSE_USERTYPE1_3)"
+echo "        от агентств: $COUNT_REALTY_HOUSE_USERTYPE2 (продажа - $COUNT_REALTY_HOUSE_USERTYPE2_2, сдача аренды - $COUNT_REALTY_HOUSE_USERTYPE2_3)"
+echo "        от контактных лиц: $COUNT_REALTY_HOUSE_USERTYPE3"
+echo "        от покупателей: $COUNT_REALTY_HOUSE_USERTYPE4"
+echo "        от арендодателя: $COUNT_REALTY_HOUSE_USERTYPE5"
+echo "    Земля: $COUNT_REALTY_LAND"
+echo "        от частных лиц: $COUNT_REALTY_LAND_USERTYPE1 (продажа - $COUNT_REALTY_LAND_USERTYPE1_2, сдача аренды - $COUNT_REALTY_LAND_USERTYPE1_3)"
+echo "        от агентств: $COUNT_REALTY_LAND_USERTYPE2 (продажа - $COUNT_REALTY_LAND_USERTYPE2_2, сдача аренды - $COUNT_REALTY_LAND_USERTYPE2_3)"
+echo "        от контактных лиц: $COUNT_REALTY_LAND_USERTYPE3"
+echo "        от покупателей: $COUNT_REALTY_LAND_USERTYPE4"
+echo "        от арендодателя: $COUNT_REALTY_LAND_USERTYPE5"
+
+
+
+echo "Пользователи"
+echo "    Всего: $COUNT_USER_TOTAL"
+echo "    С телефонами в файлах: $COUNT_USER_WITH_PHONE_FILE"
+echo "    С телефонами в базе: $COUNT_USER_WITH_PHONE_BASE"
+
+echo "Прокси-сервера"
+echo "    Всего: $COUNT_PROXY_TOTAL"
+echo "    Блокированных: $COUNT_PROXY_UNUSED"
+echo "    Свежих: $COUNT_PROXY_USED"
+
+echo ""
+
+COUNT_TWO=`sqlite3 data/data_avito.db 'select * from (select count(history_realty_id) as c, history_realty_id from history_publ_date group by history_realty_id) where c = 2' | wc -l`
+COUNT_MORE=`sqlite3 data/data_avito.db 'select * from (select count(history_realty_id) as c, history_realty_id from history_publ_date group by history_realty_id) where c > 2' | wc -l`
+echo "Количество объектов с историей даты более 2 / 3: $COUNT_TWO / $COUNT_MORE"
+COUNT_TWO=`sqlite3 data/data_avito.db 'select * from (select count(history_realty_id) as c, history_realty_id from history_price group by history_realty_id) where c = 2' | wc -l`
+COUNT_MORE=`sqlite3 data/data_avito.db 'select * from (select count(history_realty_id) as c, history_realty_id from history_price group by history_realty_id) where c > 2' | wc -l`
+echo "Количество объектов с историей цен более 2 / 3: $COUNT_TWO / $COUNT_MORE"
+
+# sqlite3 data/data_avito.db 'select * from history_publ_date where history_realty_id=83'
+# sqlite3 data/data_avito.db 'select realty_url from realty where realty_id=83'
+
+echo ""
+
+echo "Выполняемые скрипты:"
+ps all -A | grep python3
