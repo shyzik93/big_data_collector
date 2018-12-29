@@ -13,9 +13,7 @@ Place: Yeysk, Russia
 import os
 import sqlite3
 
-import collect_proxies
-from collect_proxies import Proxies
-from cur_index import CurIndex
+import parser_tools as pt
 
 #path_data = os.path.join(os.getcwd(), "data")
 #if not os.path.exists(path_pages): os.makedirs(path_pages)
