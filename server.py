@@ -1,3 +1,8 @@
+
+# # https://habr.com/company/ua-hosting/blog/281519/
+# https://habr.com/company/ua-hosting/blog/434342/ Курс MIT «Безопасность компьютерных систем». Лекция 22: «Информационная безопасность MIT», часть 1
+
+
 import dash
 from dash.dependencies import Input, Output
 import dash_core_components as dcc

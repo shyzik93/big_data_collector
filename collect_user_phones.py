@@ -51,6 +51,8 @@ cli_args = cli_parser.parse_args()
 # WebDriveApi
 # https://selenium-python.readthedocs.io/api.html
 
+# http://python-3.ru/page/selenium-python-example
+
 '''headers = {
 #"accept":"*/*",
 #"accept-language":"ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7",
@@ -72,7 +74,7 @@ def get_driver(proxy_str):
     #options.add_argument('--disable-dev-shm-usage')
     options.add_argument('--no-sandbox')
     options.add_argument('--headless')
-    print(dir(options))
+    #print(dir(options))
     options.add_experimental_option("useAutomationExtension", False)
 
     #service = service.Service('/usr/lib/chromium/chromedriver')
@@ -126,9 +128,6 @@ if __name__ == '__main__':
                 try:
                     driver.get(cs.domain_url + obj['realty_url']);
                     success = 1
-                except:
-                    driver.quit()
-                    driver = get_driver(proxies+1)
                     '''except urllib3.exceptions.MaxRetryError as e:
                     driver.quit()
                     driver = get_driver(proxies+1)
@@ -138,12 +137,20 @@ if __name__ == '__main__':
                     print(2)'''
                 except selenium.common.exceptions.TimeoutException:
                     print(1)
+                    driver = get_driver(proxies+1)
                 except selenium.common.exceptions.WebDriverException:
                     print(2)
+                    driver = get_driver(proxies+1)
+                except:
+                    #driver.quit()
+                    driver = get_driver(proxies+1)
                 finally:
                     if success == 0:
-                        driver.quit()
-                        os.spawnv(os.P_NOWAIT, '/usr/bin/python3', ['/root/parsers/collect_users_phones.py'])
+                        #print(890, dir(driver))
+                        #drive.quit()
+                        driver = get_driver(proxies+1)
+                        #driver.quit()
+                        #os.spawnv(os.P_NOWAIT, '/usr/bin/python3', ['/root/parsers/collect_users_phones.py'])
 
             print(obj['realty_id'], user['user_id'], driver.current_url)
             #print(dir(driver))

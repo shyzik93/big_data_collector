@@ -4,9 +4,6 @@
 # Date: 2018-12-27
 # Place: Yeysk, Russia
 
-# https://habr.com/company/ua-hosting/blog/281519/
-# https://habr.com/company/ua-hosting/blog/434342/
-
 COUNT_REALTY_TOTAL=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty WHERE 1'`
 COUNT_REALTY_FULL=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty WHERE realty_price IS NOT NULL'`
 COUNT_REALTY_ONLY_URL=`sqlite3 data/data_avito.db 'SELECT COUNT(realty_id) FROM realty WHERE realty_price IS NULL'`

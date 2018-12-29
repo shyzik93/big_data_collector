@@ -15,6 +15,15 @@ import sqlite3
 
 import parser_tools as pt
 
+'''
+Traceback (most recent call last):
+  File "collect_obj_data_avito.py", line 290, in <module>
+    history.insert_and_commit()
+  File "/root/parsers/config_site.py", line 139, in insert_and_commit
+    def insert_and_commit(self):
+sqlite3.OperationalError: database is locked
+'''
+
 #path_data = os.path.join(os.getcwd(), "data")
 #if not os.path.exists(path_pages): os.makedirs(path_pages)
 

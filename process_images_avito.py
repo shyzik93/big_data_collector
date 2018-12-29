@@ -119,7 +119,7 @@ class ImagePhoneProcessor():
         sql_sel = "SELECT * FROM user_contact WHERE user_contact_user_id=? AND user_contact_data=?"
         sql_ins = "INSERT INTO user_contact (user_contact_user_id, user_contact_data, user_contact_type) VALUES (?, ?, ?)"
 
-        res = cu.execute(sql_sel, (user_id, phone)).fetchall()
+        res = cu.execute(sql_sel, (user_id, self.phone)).fetchall()
         if not res:
             res = cu.execute(sql_ins, (user_id, self.phone, 'phone'))
             c.commit()
