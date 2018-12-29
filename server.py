@@ -2,6 +2,8 @@
 # # https://habr.com/company/ua-hosting/blog/281519/
 # https://habr.com/company/ua-hosting/blog/434342/ Курс MIT «Безопасность компьютерных систем». Лекция 22: «Информационная безопасность MIT», часть 1
 
+# нстройка Apache и mod_wsgi
+# https://flask-russian-docs.readthedocs.io/ru/latest/deploying/mod_wsgi.html
 
 import dash
 from dash.dependencies import Input, Output
@@ -45,7 +47,7 @@ def update_graph(selected_dropdown_value):
 app.css.append_css({'external_url': 'https://codepen.io/chriddyp/pen/bWLwgP.css'})
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
     
 # http://www.linux16.ru/articles/kak-v-linux-sdelat-probros-portov.html
 # https://bogachev.biz/2016/01/13/probros-i-perenapravlenie-portov-v-iptables/
