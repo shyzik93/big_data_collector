@@ -26,7 +26,7 @@ class _ProxiesDB():
         self.proxies = []
         self.cur_proxy_index = 0
         
-        self.path_log = os.path.join(path_data, 'proxies_log'+datetime.datetime.today().strftime('-%Y-%m-%d_%T').replace(':', '-')+'.txt')
+        self.path_log = os.path.join(path_data, 'proxies_log_'+str(os.getpid())+datetime.datetime.today().strftime('_%Y-%m-%d_%T').replace(':', '-')+'.txt')
         
         self.s = requests.Session()
         
