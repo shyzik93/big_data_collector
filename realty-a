@@ -70,13 +70,8 @@ if __name__ == '__main__':
     template_vars = {}
     template = env.get_template('object_list.html')
 
-    c = sqlite3.connect(os.path.join(cs.path_data, 'data_avito.db'))
-    c.row_factory = sqlite3.Row
-    cu = c.cursor()
-
-    c2= sqlite3.connect(os.path.join(cs.path_data, 'data_avito.db'))
-    c2.row_factory = sqlite3.Row
-    cu2 = c2.cursor()
+    c, cu = cs.get_db()
+    c2, cu2 = cs.get_db()
 
     user_type = 'Частное лицо'
     
