@@ -5,6 +5,12 @@
 # нстройка Apache и mod_wsgi
 # https://flask-russian-docs.readthedocs.io/ru/latest/deploying/mod_wsgi.html
 
+# установка Apache + Python без фреймворка
+# https://www.8host.com/blog/ustanovka-svyazki-apachemysqlpython-bez-frejmvorka-na-server-ubuntu-14-04/
+
+# Настройка mod_wsgi (Apache) для Flask
+# https://flask-russian-docs.readthedocs.io/ru/latest/deploying/mod_wsgi.html
+
 import dash
 from dash.dependencies import Input, Output
 import dash_core_components as dcc

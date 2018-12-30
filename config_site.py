@@ -11,7 +11,9 @@ Place: Yeysk, Russia
 
 
 import os
-import sqlite3
+#import sqlite3
+import pymysql
+import configparser
 
 import parser_tools as pt
 
@@ -37,42 +39,53 @@ if not os.path.exists(path_templates): os.makedirs(path_templates)
 path_db = os.path.join(path_data, 'data_avito.db')
 
 def get_db():
-    c = sqlite3.connect(path_db)
-    c.row_factory = sqlite3.Row
-    cu = c.cursor()
+    #c = sqlite3.connect(path_db)
+    #c.row_factory = sqlite3.Row
+    #cu = c.cursor()
+
+    config = configparser.ConfigParser()
+    config.read(os.path.join(os.path.dirname(path_main), 'parser_config.ini'))
     
-    cu.executescript('''
+    c = pymysql.connect(
+        db=config['db_name'],
+        user=config['db_user'],
+        passwd=config['db_password'],
+        host=config['db_host'])
+    cu = c.cursor()
+
+    
+    """cu.executescript('''
       CREATE TABLE IF NOT EXISTS realty (
         realty_id INTEGER PRIMARY KEY,
         realty_price INTEGER,
-        realty_category TEXT,
+        realty_category VARCHAR(10),
         realty_m2_building INTEGER, --  / 10 (common square)
         realty_m2_kitchen INTEGER,  -- / 10
         realty_m2_living INTEGER,  -- / 10
         realty_m2_landing INTEGER,  -- / 10
         realty_s_to_town INTEGER, -- / 10
-        realty_type_building TEXT,
-        realty_type_object TEXT,
-        realty_address TEXT,
+        realty_type_building VARCHAR(255),
+        realty_type_object VARCHAR(255),
+        realty_address VARCHAR(255),
         realty_description TEXT,
         realty_floor_total INTEGER,
         realty_deal_type_id INTEGER,
-        realty_price_arenda_type TEXT,
+        realty_price_arenda_type VARCHAR(10),
         realty_floor INTEGER,
         realty_count_rooms INTEGER,
         realty_is_multi_rooms INTEGER,
         realty_wall_material INTEGER,
         realty_date DATETIME DEFAULT CURRENT_TIMESTAMP,
         realty_user_id INTEGER,
-        realty_lat TEXT,
-        realty_lon TEXT,
+        realty_lat VARCHAR(20),
+        realty_lon VARCHAR(20),
         realty_date_publication DATETIME,
 
-        realty_address_box TEXT,
-        realty_builder_type_action TEXT,
-        realty_builder TEXT,
-        realty_name_of_building TEXT,
-        realty_decoration TEXT,
+        realty_address_box VARCHAR(255),
+        realty_builder_type_action VARCHAR(255),
+        realty_builder VARCHAR(255),
+        realty_name_of_building VARCHAR(255),
+        realty_decoration VARCHAR(255),
         realty_date_deadline TEXT,
 
         realty_is_redirect INTEGER, -- redirect if page is deleted
@@ -126,18 +139,18 @@ def get_db():
       CREATE TABLE IF NOT EXISTS user_contact (
         user_contact_id INTEGER PRIMARY KEY,
         user_contact_user_id INTEGER,
-        user_contact_type TEXT,
-        user_contact_data TEXT
+        user_contact_type VARCHAR(20),
+        user_contact_data VARCHAR(255)
       );
 
       CREATE TABLE IF NOT EXISTS proxy (
         proxy_id INTEGER PRIMARY KEY,
-        proxy_ip TEXT,
+        proxy_ip VARCHAR(255),
         proxy_port INTEGER,
         site_avito DATETIME,
         site_cian DATETIME,
         date_added DATETIME DEFAULT CURRENT_TIMESTAMP
       );
-      ''')
+      ''')"""
     
     return c, cu

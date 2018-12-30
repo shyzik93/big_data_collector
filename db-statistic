@@ -93,10 +93,10 @@ echo ""
 
 COUNT_TWO=`sqlite3 data/data_avito.db 'select * from (select count(history_realty_id) as c, history_realty_id from history_publ_date group by history_realty_id) where c = 2' | wc -l`
 COUNT_MORE=`sqlite3 data/data_avito.db 'select * from (select count(history_realty_id) as c, history_realty_id from history_publ_date group by history_realty_id) where c > 2' | wc -l`
-echo "Количество объектов с историей даты более 2 / 3: $COUNT_TWO / $COUNT_MORE"
+echo "Количество объектов с историей даты более 2 / > 2: $COUNT_TWO / $COUNT_MORE"
 COUNT_TWO=`sqlite3 data/data_avito.db 'select * from (select count(history_realty_id) as c, history_realty_id from history_price group by history_realty_id) where c = 2' | wc -l`
 COUNT_MORE=`sqlite3 data/data_avito.db 'select * from (select count(history_realty_id) as c, history_realty_id from history_price group by history_realty_id) where c > 2' | wc -l`
-echo "Количество объектов с историей цен более 2 / 3: $COUNT_TWO / $COUNT_MORE"
+echo "Количество объектов с историей цен 2 / > 2 : $COUNT_TWO / $COUNT_MORE"
 
 # sqlite3 data/data_avito.db 'select * from history_publ_date where history_realty_id=83'
 # sqlite3 data/data_avito.db 'select realty_url from realty where realty_id=83'
