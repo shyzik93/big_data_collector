@@ -45,6 +45,7 @@ def get_db():
 
     config = configparser.ConfigParser()
     config.read(os.path.join(os.path.dirname(path_main), 'parser_config.ini'))
+    config = config['database']
     
     c = pymysql.connect(
         db=config['db_name'],
