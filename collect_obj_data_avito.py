@@ -25,6 +25,9 @@ cli_args = cli_parser.parse_args()
 
 #TODO collect info about publicator (fio, name of organization)
 
+def func_compare_publ_date(old, new):
+    return old.split()[0] == new.split()[0]
+
 if __name__ == '__main__':
     curIndex = pt.CurIndex(os.path.join(cs.path_data, 'cur_obj_id.txt'))
     cur_obj_id = curIndex.get()
@@ -299,7 +302,7 @@ if __name__ == '__main__':
 
         # history of different properties
 
-        if 'realty_date_publication' in fields: history.save(obj['realty_id'], "history_publ_date", 'history_publ_date', fields['realty_date_publication'])
+        if 'realty_date_publication' in fields: history.save(obj['realty_id'], "history_publ_date", 'history_publ_date', fields['realty_date_publication'], func_compare_publ_date)
         if 'realty_price' in fields: history.save(obj['realty_id'], "history_price", 'history_price', fields['realty_price'])
         history.insert_and_commit()
 

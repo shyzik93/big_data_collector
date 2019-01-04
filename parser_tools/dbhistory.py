@@ -13,7 +13,8 @@ class DBHistory():
     def func_compare(self, old, new):
         return old == new
 
-    def save(self, realty_id, table_name, value_name, new_value, func_compare=self.func_compare):
+    def save(self, realty_id, table_name, value_name, new_value, func_compare=None):
+        if func_compare is None: func_compare = self.func_compare
         sql = "SELECT * FROM `"+table_name+"` WHERE `history_realty_id`=? ORDER BY `history_date` DESC LIMIT 1"
         res2 = self.cu.execute(sql, (realty_id,)).fetchall()
         if res2: res2 = res2[0]
