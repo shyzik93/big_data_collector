@@ -10,11 +10,14 @@ class DBHistory():
         self.cu = cu
         self.c = c
 
-    def save(self, realty_id, table_name, value_name, new_value):
+    def func_compare(self, old, new):
+        return old == new
+
+    def save(self, realty_id, table_name, value_name, new_value, func_compare=self.func_compare):
         sql = "SELECT * FROM `"+table_name+"` WHERE `history_realty_id`=? ORDER BY `history_date` DESC LIMIT 1"
         res2 = self.cu.execute(sql, (realty_id,)).fetchall()
         if res2: res2 = res2[0]
-        if not res2 or res2[value_name] != new_value:
+        if not res2 or not func_compare(res2[value_name], new_value):
             sql = "INSERT INTO `"+table_name+"` (`history_realty_id`, `"+value_name+"`) VALUES (?, ?); "
             self.cu.execute(sql, (realty_id, new_value))
 
