@@ -11,7 +11,7 @@ if __name__ == "__main__":
     c, cu = cs.get_db()
 
     f = open(output_path, 'w')
-    csvw = csv.writer(f)
+    csvw = csv.writer(f, delimiter=';')
 
     csvw.writerow([
         'full name (contact)',
@@ -29,7 +29,7 @@ if __name__ == "__main__":
     rows = c.execute(sql).fetchall()
     for row in rows:
 
-        user_position = ''
+        user_position = row['user_type_name']
         responsible = ''
         who_create_contact = 'Polyakov Konstantin'
 
@@ -40,7 +40,7 @@ if __name__ == "__main__":
             who_create_contact,
             row['user_contact_data'],
             when_create_contact,
-            row['user_url'],
+            cs.domain_url+row['user_url'],
         ])
 
     f.close()
