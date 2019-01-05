@@ -10,7 +10,7 @@ class Base():
         self.login = login
         self.client_hash = client_hash
 
-        self.domain = 'http://'+subdomain+'.amocrm.ru/'
+        self.domain = 'https://'+subdomain+'.amocrm.ru/'
         self.url = self.domain+'api/v2/'
 
         self.s = requests.Session()
@@ -22,7 +22,7 @@ class Base():
 
     def auth(self):
         url = self.domain + 'private/api/auth.php?type=json'
-        data = {'USER_LOGN':self.login, 'USER_HASH': self.client_hash}
+        data = {'USER_LOGIN':self.login, 'USER_HASH': self.client_hash}
         res = self.s.post(url, data=json.dumps(data), headers=self.headers)
 
         if res.status_code in [200, 204]:
@@ -50,6 +50,8 @@ if __name__ == '__main__':
     config.read('../parser_config.ini')
     #print(dict(config['DEFAULT']))
     config = config['amocrm']
+
+    #print(dict(config))
 
     amo = Base(config['subdomain'], config['login'], config['client_hash'])
     amo.auth()
